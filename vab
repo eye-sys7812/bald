@@ -1,0 +1,116 @@
+Eyu, [17/03/2026 5:39 am]
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ================================================
+# Grade 11 Physics Project #10: Numerical Center of Mass
+# ================================================
+# Task: Calculate the center of mass of an irregular 2D shape
+#       with non-uniform density using Riemann sums (double integration
+#       over a grid matrix).
+#
+# Shape chosen: L-shaped region (irregular)
+#   - Horizontal bar: 0 ≤ x ≤ 4, 0 ≤ y ≤ 1
+#   - Vertical bar: 0 ≤ x ≤ 1, 1 ≤ y ≤ 3
+#
+# Density: ρ(x, y) = x + y  (non-uniform, varies across the region)
+#
+# Method: Step-by-step numerical double integration using nested loops
+#         (Riemann sums). No analytical shortcuts.
+#
+# Visualization: Matplotlib heatmap of density + center of mass marked.
+#                (Matplotlib used as permitted for 2D graphing)
+#
+# You can easily modify:
+#   - dx, dy for finer/coarser grid
+#   - The mask condition for a different irregular shape
+#   - The rho formula for different non-uniform density
+# ================================================
+
+# Grid parameters (small Δx, Δy for good accuracy)
+dx = 0.01
+dy = 0.01
+x = np.arange(0, 4.01, dx)          # x from 0 to 4
+y = np.arange(0, 3.01, dy)          # y from 0 to 3
+X, Y = np.meshgrid(x, y)
+
+# Boolean mask for the irregular L-shaped region
+mask = (Y <= 1) | (X <= 1)
+
+# Riemann sum variables
+total_mass = 0.0
+moment_x = 0.0
+moment_y = 0.0
+dA = dx * dy
+
+# Step-by-step numerical double integration (nested loops)
+# This is the core "numerical calculus" part required by the project
+print("Computing Riemann sums (this may take a few seconds with fine grid)...")
+for i in range(len(x)):
+    for j in range(len(y)):
+        if mask[j, i]:                  # point is inside the L-shape
+            rho = x[i] + y[j]           # non-uniform density at (x[i], y[j])
+            total_mass += rho * dA
+            moment_x += x[i] * rho * dA
+            moment_y += y[j] * rho * dA
+
+# Calculate center of mass
+if total_mass > 0:
+    x_cm = moment_x / total_mass
+    y_cm = moment_y / total_mass
+else:
+    x_cm = y_cm = 0
+
+print(f"\nResults:")
+print(f"   Total mass (M) ≈ {total_mass:.4f}")
+print(f"   Center of Mass: x_cm = {x_cm:.4f}, y_cm = {y_cm:.4f}")
+print("   (Close to analytical value for this shape: ~1.867, 1.067)")
+
+# ===================== VISUALIZATION =====================
+# Create density array only inside the shape for plotting
+density = np.zeros_like(X, dtype=float)
+density[mask] = X[mask] + Y[mask]   # same ρ(x,y) = x + y
+
+fig, ax = plt.subplots(figsize=(10, 7))
+
+# Heatmap of density (shows the grid matrix used for Riemann sums)
+c = ax.pcolormesh(X, Y, density, cmap='plasma', shading='auto', vmin=0)
+plt.colorbar(c, label='Density ρ(x, y) = x + y')
+
+# Mark the center of mass
+ax.plot(x_cm, y_cm, 'ko', markersize=14, label=f'Center of Mass\n({x_cm:.2f}, {y_cm:.2f})')
+ax.plot(x_cm, y_cm, 'wo', markersize=8)  # white outline for visibility
+
+# Draw the exact boundary of the L-shape (for clarity)
+ax.plot([0, 4], [0, 0], 'k-', lw=3)      # bottom
+ax.plot([4, 4], [0, 1], 'k-', lw=3)
+ax.plot([1, 4], [1, 1], 'k-', lw=3)
+ax.plot([1, 1], [1, 3], 'k-', lw=3)
+ax.plot([0, 1], [3, 3], 'k-', lw=3)
+ax.plot([0, 0], [0, 3], 'k-', lw=3)
+
+ax.set_xlabel('x (meters)')
+ax.set_ylabel('y (meters)')
+ax.set_title('Numerical Center of Mass of Irregular L-Shaped Region\n'
+             '(Riemann Sum Double Integration over Grid Matrix)')
+ax.legend()
+ax.grid(True, alpha=0.3)
+ax.set_aspect('equal')
+
+plt.tight_layout()
+plt.show()
+
+# ================================================
+# How to use for your project:
+# 1. Save as center_of_mass.py
+# 2. Run with Python 3 (requires numpy + matplotlib)
+# 3. Take 2-3 screenshots of the plot + code for your PDF submission
+# 4. Upload to GitHub repository (public or private with teacher access)
+
+Eyu, [17/03/2026 5:39 am]
+# 5. In your essay, explain:
+#    - The double integrals for x_cm and y_cm
+#    - Why Riemann sums are needed (no closed-form solution for irregular shape)
+#    - Challenges (grid resolution, computation time)
+#    - What the result shows about the balance point
+# ================================================
